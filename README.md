@@ -4,7 +4,6 @@
 - **Authors**: Dominic Mullen
 - **License**: [Apache 2](http://opensource.org/licenses/Apache-2.0)
 - [Package source code on Github](https://github.com/NCEAS/data-processing)
-- [**Submit Code for review**](https://github.com/NCEAS/data-processing/pulls)
 
 ## Style
 We generally follow the [tidyverse style conventions](http://style.tidyverse.org/), with the following specific style preferences: 
