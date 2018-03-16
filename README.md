@@ -19,7 +19,7 @@ to your personal github profile.
   
 ![](images/fork.png)
   
-- Navigate to your personal github profile and copy the "download with HTTPS:"" link from the "Clone or
+- Navigate to your personal github profile (https://github.com/YOURUSERNAME/data-processing) and copy the "download with HTTPS:"" link from the "Clone or
 Download" button.  You must do this from your fork on your github profile! 
   
 ![](images/clone.png)
@@ -42,7 +42,7 @@ your changes to your fork.
   
 ![](images/terminal.png)
   
-- If the commit to your fork is successful, then navigate to your fork: https://github.com/yourname/data-processing.  
+- If the commit to your fork is successful, then navigate to your fork: https://github.com/YOURUSERNAME/data-processing.  
 From here click on "New Pull Request" to submit your code for review.  
   
 ![](images/pull.png)
