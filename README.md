@@ -13,6 +13,9 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 - all functions should include argument checks in the form of `stopifnot` statements
 
 ## Contributing
+### *First Contribution* 
+[Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
+to your personal github profile.](inst/fork.png)  
 
 ## Acknowledgements
 Work on this package was supported by:
