@@ -18,17 +18,17 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 - Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
 to your personal github profile.
   
-![](images/fork.png){:height="150px" width="200px"}
+![](images/fork.png)
   
-- Navigate to your personal github personal and copy the download with HTTPS: link from the "Clone or
+- Navigate to your personal github profile and copy the "download with HTTPS:"" link from the "Clone or
 Download" button.  You must do this from your fork on your github profile! 
   
-![](images/clone.png){:height="100px" width="100px"}
+![](images/clone.png)
 
 - Next, open an R session and navigate to: File >> New Project >> Version Control >> Git and paste the
 repository url that you copied into the box.  
   
-![](images/git.png){:height="200px" width="200px"}
+![](images/git.png)
   
 - Once you've opened the project you can create a new file and save it to the R folder.  Alternatively, you can
 create a new folder with your name in the R folder, and then create a new file in that subdirectory.  If this is 
@@ -41,7 +41,7 @@ your changes to your fork.
     - *git commit -m "adding processing scripts"*  commits your changes.  Type and appropriate commit message in the parentheses
     - *git push origin master* this pushes your commit to the master branch of your fork (your github profile)
   
-![](images/terminal.png) {:height="36px" width="36px"}
+![](images/terminal.png)
   
 - If the commit to your fork is successful, then navigate to your fork: https://github.com/yourname/data-processing.  
 From here click on "New Pull Request" to submit your code for review.  
