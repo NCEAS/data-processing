@@ -14,8 +14,11 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 
 ## Contributing
 ### *First Contribution* 
-[Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
-to your personal github profile.](inst/fork.png)  
+Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
+to your personal github profile.(inst/fork.png)
+
+Navigate to your personal github personal and copy the download with HTTPS: link from the "Clone or
+Download" button.  You must do this from your fork on your github profile! (inst/clone.png)
 
 ## Acknowledgements
 Work on this package was supported by:
