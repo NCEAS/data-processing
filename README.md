@@ -17,7 +17,7 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 - Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
 to your personal github profile.
   
-![](images/fork.png)
+<img src="images/fork.png" height="500px" width="500px" />
   
 - Navigate to your personal github profile (https://github.com/YOURUSERNAME/data-processing) and copy the "download with HTTPS:"" link from the "Clone or
 Download" button.  You must do this from your fork on your github profile! 
