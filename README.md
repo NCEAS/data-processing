@@ -15,10 +15,13 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 ## Contributing
 ### *First Contribution* 
 Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
-to your personal github profile.(inst/fork.png)
+to your personal github profile. [fork](inst/fork.png)
 
 Navigate to your personal github personal and copy the download with HTTPS: link from the "Clone or
-Download" button.  You must do this from your fork on your github profile! (inst/clone.png)
+Download" button.  You must do this from your fork on your github profile! [clone](inst/clone.png)
+
+Next, open an R session and navigate to: File >> New Project >> Version Control >> Git and paste the
+repository url that you copied into the box.  [new project](inst/new.png)
 
 ## Acknowledgements
 Work on this package was supported by:
