@@ -30,10 +30,21 @@ repository url that you copied into the box.
   
 ![](images/git.png)
   
-Once you've opened the project you can create a new file and save it to the R folder.  Alternatively, you can
+- Once you've opened the project you can create a new file and save it to the R folder.  Alternatively, you can
 create a new folder with your name in the R folder, and then create a new file in that subdirectory.  If this is 
 a script you previously developed, I recommend just copying pasting your code into a new R file. Alternatively you 
 can use the "Upload button" in the "Files" section of the Rstudio viewer to upload your R script.  
+  
+- When you are ready to commit your files(s) you can do so using the Git tab or terminal in Rstudio.  These instructions use terminal:  open terminal (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload 
+your changes to your fork.  
+    - *git add .*  Adds all changes to the next commit 
+    - *git commit -m "adding processing scripts"*  commits your changes.  Type and appropriate commit message in the parentheses
+    - *git push origin master* this pushes your commit to the master branch of your fork (your github profile)
+  
+![](images/terminal.png)
+  
+- If the commit to your fork is successful, then navigate to your fork: https://github.com/yourname/data-processing.  
+
 
 ## Acknowledgements
 Work on this package was supported by:
