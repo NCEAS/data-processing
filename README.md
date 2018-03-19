@@ -51,11 +51,19 @@ can use the "Upload button" in the "Files" section of the Rstudio viewer to uplo
 From here click on "New Pull Request" to submit your code for review.  
 
 <p align="center">
-<img src="images/pull.png" width="200px" />
+<img src="images/pull.png" width="300px" />
 </p>
   
 ### *Making changes to your contribution*
-
+After you've recieved comments on your pull request you'll probably need to make some changes to your code.  This is normal and you will most likely have to make some changes to your pull request based on the maintainer's review.
+  
+1. Open Rstudio and re-open the data-processing.Rproj.  Follow this path: File >> Open Project >> data-processing folder >> data-processing.Rproj.   
+<img src="images/rproj.png" width="300px" />
+  
+2. Make changes to your files and follow step 5 from 'First Contribution' to commit your changes.  It is generally a good idea to make multiple commits rather than one large commit.  For instance you could make one commit called "fixed typos and added comments", and commit called "fixed for loop".  Try to keep your changes in each commit related to the commit message, however, it's not necessary to make one commit for every small change you make.  Use your best judgement and look at other peoples' commits, you'll get the feel of what makes a good commit.
+  
+3. If you have an open pull request (you should at this point), github will recognize this and add your most recent commits to the bottom of your pull request.  Your reviewer will usually get an email notifying them that you made changes, however, it's a good idea to tag them (ex. @dmullen17) in the comments of your pull request and let them know you made updates. 
+  
 ### *Second+ Contributions*
 
 
