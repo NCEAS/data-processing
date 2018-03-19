@@ -1,4 +1,4 @@
-#data-processing
+# data-processing
 ### *Repository dedicated to storing and improving datateam processing scripts*
 
 - **Authors**: Dominic Mullen
@@ -14,38 +14,41 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 ## Contributing
 ### *First Contribution*
   
-- Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
+1. Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
 to your personal github profile.
   
-<img src="images/fork.png" height="500px" width="500px" />
+<img src="images/fork.png" width="500px" />
   
-- Navigate to your personal github profile (https://github.com/YOURUSERNAME/data-processing) and copy the "download with HTTPS:"" link from the "Clone or
+2. Navigate to your personal github profile (https://github.com/YOURUSERNAME/data-processing) and copy the "download with HTTPS:"" link from the "Clone or
 Download" button.  You must do this from your fork on your github profile! 
   
-![](images/clone.png)
+<img src="images/clone.png" width="300px" />
 
-- Next, open an R session and navigate to: File >> New Project >> Version Control >> Git and paste the
+3. Next, open an R session and navigate to: File >> New Project >> Version Control >> Git and paste the
 repository url that you copied into the box.  
   
-![](images/git.png)
+<img src="images/git.png" width="300px" />
+
   
-- Once you've opened the project you can create a new file and save it to the R folder.  Alternatively, you can
+4. Once you've opened the project you can create a new file and save it to the R folder.  Alternatively, you can
 create a new folder with your name in the R folder, and then create a new file in that subdirectory.  If this is 
 a script you previously developed, I recommend just copying pasting your code into a new R file. Alternatively you 
 can use the "Upload button" in the "Files" section of the Rstudio viewer to upload your R script.  
   
-- When you are ready to commit your files(s) you can do so using the Git tab or terminal in Rstudio.  These instructions use terminal:  open terminal (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload 
+5.  There are two options for this next step.  You can complete it using the command line in terminal, or the Git tab in Rstudio.  
+    1. *Terminal:* Open terminal (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload
 your changes to your fork.  
-    - *git add .*  Adds all changes to the next commit 
-    - *git commit -m "adding processing scripts"*  commits your changes.  Type and appropriate commit message in the parentheses
-    - *git push origin master* this pushes your commit to the master branch of your fork (your github profile)
+        - *git add .*  Adds all changes to the next commit 
+        - *git commit -m "adding processing scripts"*  commits your changes.  Type and appropriate commit message in the parentheses
+        - *git push origin master* this pushes your commit to the master branch of your fork (your github profile)  
+<img src="images/terminal.png" width="400px" />  
+    2. *RStudio Git tab:*  
   
-![](images/terminal.png)
-  
-- If the commit to your fork is successful, then navigate to your fork: https://github.com/YOURUSERNAME/data-processing.  
+6. If the commit to your fork is successful, then navigate to your fork: https://github.com/YOURUSERNAME/data-processing.  
 From here click on "New Pull Request" to submit your code for review.  
   
-![](images/pull.png)
+<img src="images/pull.png" width="200px" />
+
 
 ## Acknowledgements
 Work on this package was supported by:
