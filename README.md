@@ -41,8 +41,7 @@ a script you previously developed, I recommend just copying pasting your code in
 can use the "Upload button" in the "Files" section of the Rstudio viewer to upload your R script.  
   
 5.  There are two options for this next step.  You can complete it using the command line in terminal, or the Git tab in Rstudio.  
-    1. *Terminal:* Open terminal (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload
-your changes to your fork.  
+    1. *Terminal:* Open the terminal tab next to your console (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload your changes to your fork.  
         - *git add .*  Adds all changes to the next commit. 
         - *git commit -m "adding processing scripts"*  commits your changes.  Type an appropriate commit message in the quotation marks.
         - *git push origin master* this pushes your commit to the master branch of your fork (your github profile).<img src="images/terminal.png" width="500px" />
