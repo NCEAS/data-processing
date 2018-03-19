@@ -45,8 +45,7 @@ can use the "Upload button" in the "Files" section of the Rstudio viewer to uplo
 your changes to your fork.  
         - *git add .*  Adds all changes to the next commit. 
         - *git commit -m "adding processing scripts"*  commits your changes.  Type an appropriate commit message in the quotation marks.
-        - *git push origin master* this pushes your commit to the master branch of your fork (your github profile).
-<img src="images/terminal.png" width="500px" />
+        - *git push origin master* this pushes your commit to the master branch of your fork (your github profile).<p align="center"> <img src="images/terminal.png" width="500px" /> </p>
     2. *RStudio Git tab:*  
   
 6. If the commit to your fork is successful, then navigate to your fork: https://github.com/YOURUSERNAME/data-processing.  
