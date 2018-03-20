@@ -13,7 +13,7 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 - all functions should include argument checks in the form of `stopifnot` statements
 
 ## Contributing
-### *First Contribution*
+###*First Contribution*
   
 1. Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
 to your personal github profile.
@@ -58,14 +58,25 @@ From here click on "New Pull Request" to submit your code for review.
 After you've recieved comments on your pull request you'll probably need to make some changes to your code.  This is normal and you will most likely have to make some changes to your pull request based on the maintainer's review.
   
 1. Open Rstudio and re-open the data-processing.Rproj.  Follow this path: File >> Open Project >> data-processing folder >> data-processing.Rproj.   
+<p align="center">
 <img src="images/rproj.png" width="300px" />
+</p>
   
 2. Make changes to your files and follow step 5 from 'First Contribution' to commit your changes.  It is generally a good idea to make multiple commits rather than one large commit.  For instance you could make one commit called "fixed typos and added comments", and commit called "fixed for loop".  Try to keep your changes in each commit related to the commit message, however, it's not necessary to make one commit for every small change you make.  Use your best judgement and look at other peoples' commits, you'll get the feel of what makes a good commit.
   
 3. If you have an open pull request (you should at this point), github will recognize this and add your most recent commits to the bottom of your pull request.  Your reviewer will usually get an email notifying them that you made changes, however, it's a good idea to tag them (ex. @dmullen17) in the comments of your pull request and let them know you made updates. 
   
-### *Second+ Contributions*
-
+### *Subsequent Contributions*
+If you've contributed to a repository in the past and need to do so again, it's likely that the contents changed since 
+your last contribution.  Before you can submit another pull request we need to Pull any changes to your local directory.  
+  
+1. We can Pull any changes from upstream master (github.com/NCEAS/data-processing) using Terminal - unfortunately the Git tab in Rstudio can't do this.
+    - Open Rstudio and re-open the data-processing.Rproj.  Follow this path: File >> Open Project >> data-processing folder >> data-processing.Rproj.  
+    - Open the terminal tab next to your console (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload your changes to your fork.
+    - *git remote add upstream https://github.com/NCEAS/data-processing.git* - adds the upstream repository (you only have to do this once)
+    - *git pull upstream master* - pulls any changes from the data-processing branch
+2. Follow steps 4-6 from [First Contribution](###first-contribution)
+        
 
 ## Acknowledgements
 Work on this package was supported by:
