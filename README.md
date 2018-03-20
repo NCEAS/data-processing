@@ -13,7 +13,7 @@ We generally follow the [tidyverse style conventions](http://style.tidyverse.org
 - all functions should include argument checks in the form of `stopifnot` statements
 
 ## Contributing
-###*First Contribution*
+### *First Contribution*
   
 1. Fork the data-processing repository by clicking on the "Fork" button.  This copies the repository 
 to your personal github profile.
@@ -22,7 +22,7 @@ to your personal github profile.
 <img src="images/fork.png" width="500px"/>
 </p>
   
-2. Navigate to your personal github profile (https://github.com/YOURUSERNAME/data-processing) and copy the "download with HTTPS:"" link from the "Clone or Download" button.  You must do this from your fork on your github profile!
+2. Navigate to your personal github profile (https://github.com/YOURUSERNAME/data-processing) and copy the "Clone with HTTPS:" link from the "Clone or Download" button.  You must do this from your fork on your github profile!
   
 <p align="center">
 <img src="images/clone.png" width="300px"/>
@@ -62,7 +62,7 @@ After you've recieved comments on your pull request you'll probably need to make
 <img src="images/rproj.png" width="300px" />
 </p>
   
-2. Make changes to your files and follow step 5 from 'First Contribution' to commit your changes.  It is generally a good idea to make multiple commits rather than one large commit.  For instance you could make one commit called "fixed typos and added comments", and commit called "fixed for loop".  Try to keep your changes in each commit related to the commit message, however, it's not necessary to make one commit for every small change you make.  Use your best judgement and look at other peoples' commits, you'll get the feel of what makes a good commit.
+2. Make changes to your files and follow step 5 from [First Contribution](#first-contribution) to commit your changes.  It is generally a good idea to make multiple commits rather than one large commit.  For instance you could make one commit called "fixed typos and added comments", and commit called "fixed for loop".  Try to keep your changes in each commit related to the commit message, however, it's not necessary to make one commit for every small change you make.  Use your best judgement and look at other peoples' commits, you'll get the feel of what makes a good commit.
   
 3. If you have an open pull request (you should at this point), github will recognize this and add your most recent commits to the bottom of your pull request.  Your reviewer will usually get an email notifying them that you made changes, however, it's a good idea to tag them (ex. @dmullen17) in the comments of your pull request and let them know you made updates. 
   
@@ -75,7 +75,8 @@ your last contribution.  Before you can submit another pull request we need to P
     - Open the terminal tab next to your console (if it's not already open) with by pressing Shift+alt+t.  The following commands will upload your changes to your fork.
     - *git remote add upstream https://github.com/NCEAS/data-processing.git* - adds the upstream repository (you only have to do this once)
     - *git pull upstream master* - pulls any changes from the data-processing branch
-2. Follow steps 4-6 from [First Contribution](###first-contribution)
+  
+2. Follow steps 4-6 from [First Contribution](#first-contribution)
         
 
 ## Acknowledgements
