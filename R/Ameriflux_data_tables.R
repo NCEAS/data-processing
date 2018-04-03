@@ -60,6 +60,11 @@ attribute_definitions <- function(data_path, definitions){
   
   data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
+  #potential qualifiers
+  int_qualifiers <- c('_1','_2','_3','_4','_5','_6','_7','_8','_9')
+  char_qualifiers <- c('_PI','_QC','_IU','_SD','_F','_R','_A')
+  qualifiers <- c(int_qualifiers, char_qualifiers)
+  
   attributes <- colnames(data)
   
   #will be vector of attribute definitions
@@ -71,47 +76,32 @@ attribute_definitions <- function(data_path, definitions){
   for (att in attributes){
     
     #if the attribute has one of the attached qualifiers
-    #get definition of qualifier to paste onto regular definition later
+    #figure out which qualifier it is
     #set att to the regular attribute name (w/out qualifier)
+    #if it is an int_qualifier, set it to '_#' so its definition can be found in "definitions"
+    #get extra definition of qualifier to paste onto regular definition later
     #set a flag that this attribute includes a qualifier
     
-    #did not do all of the possible combinations of qualifiers
-    #because not all possible combinations appeared in data
-    
-    if (str_sub(att,-5,-1) == '_PI_F'){
-      x <- str_sub(att,-5,-1)
-      extra <- paste(definitions[which(definitions$uniqueAttributeLabel == '_PI'), 'uniqueAttributeDefinition'],
-                     definitions[which(definitions$uniqueAttributeLabel == '_F'), 'uniqueAttributeDefinition'],
-                     sep = '; ')
-      str_sub(att,-5,-1) <- ""
-      QUALIFIERS_EXIST <- TRUE
-    }
-    
-    else if (str_sub(att,-3,-1) %in% c('_PI','_QC','_IU','_SD')){
-      x <- str_sub(att,-3,-1)
-      extra <- definitions[which(definitions$uniqueAttributeLabel == x), 'uniqueAttributeDefinition']
-      str_sub(att,-3,-1) <- ""
-      QUALIFIERS_EXIST <- TRUE
-    }
-    
-    else if (str_sub(att,-2,-1) == '_F'){
-      x <- '_F'
-      extra <- definitions[which(definitions$uniqueAttributeLabel == '_F'), 'uniqueAttributeDefinition']
-      str_sub(att,-2,-1) <- ""
-      QUALIFIERS_EXIST <- TRUE
-    }
-    
-    else if (str_sub(att,-2,-1) %in% c('_1','_2','_3','_4','_5','_6','_7','_8','_9')){
-      x <- '_#'
-      extra <- definitions[which(definitions$uniqueAttributeLabel == '_#'), 'uniqueAttributeDefinition']
-      str_sub(att,-2,-1) <- ""
-      QUALIFIERS_EXIST <- TRUE
-    }
-    
-    else if (str_sub(att,-2,-1) %in% c('_R','_A')){
-      x <- paste('_H_V', str_sub(att,-2,-1), sep = '')
-      extra <- definitions[which(definitions$uniqueAttributeLabel == x), 'uniqueAttributeDefinition']
-      str_sub(att,-6,-1) <- ""
+    if (sum(sapply(qualifiers, grepl, x = att)) > 0){
+      
+      qualifier_indeces <- which(sapply(qualifiers, grepl, x = att) == TRUE)
+      att_qualifiers <- qualifiers[qualifier_indeces]
+      
+      for (j in 1:length(att_qualifiers)){
+        att <- gsub(att_qualifiers[j], replacement = '', x = att)
+      }
+      
+      if (att_qualifiers[1] %in% int_qualifiers){
+        att_qualifiers <- '_#'
+      }
+      
+      #using paste in case there are multiple qualifiers
+      #in reality, only needed for _PI_F
+      #same reason for using for loop below (length(att_qualifiers) should be 1 or 2)
+      extra <- paste(definitions[which(definitions$uniqueAttributeLabel %in% att_qualifiers), 
+                                 'uniqueAttributeDefinition'],
+                     collapse = '; ')
+      
       QUALIFIERS_EXIST <- TRUE
     }
     
@@ -135,7 +125,7 @@ attribute_definitions <- function(data_path, definitions){
       #def is the corresponding definition for i-th attribute
       def <- paste(definitions[which(definitions$uniqueAttributeLabel == att),'uniqueAttributeDefinition'],
                    '; With qualifier \'',
-                   x,
+                   paste(att_qualifiers, collapse = ''),
                    '\' ',
                    extra,
                    sep = '')
@@ -545,5 +535,5 @@ attribute_table <- function(data_path, definitions){
 
 # Example:
 
-attribute_table(data_path_2,definitions)
-EML::set_attributes(attribute_table(data_path_2,definitions))
+# attribute_table(data_path_2,definitions)
+# EML::set_attributes(attribute_table(data_path_2,definitions))
