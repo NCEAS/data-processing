@@ -30,55 +30,20 @@ library(stringr)
 
 
 definitions <- read.csv('/home/reevesman/Ameriflux/attribute_function/definitions.csv',
-                        stringsAsFactors = F)
+                        stringsAsFactors = FALSE)
 
-data1 <- read.csv('/home/reevesman/Ameriflux/AMF_US-Ivo/AMF_US-Ivo_BASE_HH_2-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data2 <- read.csv('/home/reevesman/Ameriflux/AMF_US-ICt/AMF_US-ICt_BASE_HH_2-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data3 <- read.csv('/home/reevesman/Ameriflux/AMF_US-ICs/AMF_US-ICs_BASE_HH_2-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data4 <- read.csv('/home/reevesman/Ameriflux/AMF_US-ICh/AMF_US-ICh_BASE_HH_2-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data5 <- read.csv('/home/reevesman/Ameriflux/AMF_US-EML/AMF_US-EML_BASE_HH_1-4.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data6 <- read.csv('/home/reevesman/Ameriflux/AMF_US-Brw/AMF_US-Brw_BASE_HH_2-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data7 <- read.csv('/home/reevesman/Ameriflux/AMF_US-Atq/AMF_US-Atq_BASE_HH_1-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data8 <- read.csv('/home/reevesman/Ameriflux/AMF_CA-Qfo/AMF_CA-Qfo_BASE_HH_1-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data9 <- read.csv('/home/reevesman/Ameriflux/AMF_CA-Ojp/AMF_CA-Ojp_BASE_HH_1-1.csv',
-                  skip = 2,
-                  stringsAsFactors = F)
-
-data10 <- read.csv('/home/reevesman/Ameriflux/AMF_CA-Oas/AMF_CA-Oas_BASE_HH_1-1.csv',
-                   skip = 2,
-                   stringsAsFactors = F)
-
-data11 <- read.csv('/home/reevesman/Ameriflux/AMF_CA-Man/AMF_CA-Man_BASE_HH_2-1.csv',
-                   skip = 2,
-                   stringsAsFactors = F)
-
-data12 <- read.csv('/home/reevesman/Ameriflux/AMF_CA-Gro/AMF_CA-Gro_BASE_HH_1-1.csv',
-                   skip = 2,
-                   stringsAsFactors = F)
+data_path_1 <- '/home/reevesman/Ameriflux/AMF_US-Ivo/AMF_US-Ivo_BASE_HH_2-1.csv'
+data_path_2 <- '/home/reevesman/Ameriflux/AMF_US-ICt/AMF_US-ICt_BASE_HH_2-1.csv'
+data_path_3 <- '/home/reevesman/Ameriflux/AMF_US-ICs/AMF_US-ICs_BASE_HH_2-1.csv'
+data_path_4 <- '/home/reevesman/Ameriflux/AMF_US-ICh/AMF_US-ICh_BASE_HH_2-1.csv'
+data_path_5 <- '/home/reevesman/Ameriflux/AMF_US-EML/AMF_US-EML_BASE_HH_1-4.csv'
+data_path_6 <- '/home/reevesman/Ameriflux/AMF_US-Brw/AMF_US-Brw_BASE_HH_2-1.csv'
+data_path_7 <- '/home/reevesman/Ameriflux/AMF_US-Atq/AMF_US-Atq_BASE_HH_1-1.csv'
+data_path_8 <- '/home/reevesman/Ameriflux/AMF_CA-Qfo/AMF_CA-Qfo_BASE_HH_1-1.csv'
+data_path_9 <- '/home/reevesman/Ameriflux/AMF_CA-Ojp/AMF_CA-Ojp_BASE_HH_1-1.csv'
+data_path_10 <- '/home/reevesman/Ameriflux/AMF_CA-Oas/AMF_CA-Oas_BASE_HH_1-1.csv'
+data_path_11 <- '/home/reevesman/Ameriflux/AMF_CA-Man/AMF_CA-Man_BASE_HH_2-1.csv'
+data_path_12 <- '/home/reevesman/Ameriflux/AMF_CA-Gro/AMF_CA-Gro_BASE_HH_1-1.csv'
 
 
 ##############################################################################
@@ -91,7 +56,9 @@ data12 <- read.csv('/home/reevesman/Ameriflux/AMF_CA-Gro/AMF_CA-Gro_BASE_HH_1-1.
 
 ##############################################################################
 
-attribute_definitions <- function(data, definitions){
+attribute_definitions <- function(data_path, definitions){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   
@@ -211,7 +178,9 @@ attribute_definitions <- function(data, definitions){
 
 ##############################################################################
 
-attribute_units <- function(data, definitions){
+attribute_units <- function(data_path, definitions){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   
@@ -290,7 +259,9 @@ attribute_units <- function(data, definitions){
 
 ##############################################################################
 
-attribute_names <- function(data){
+attribute_names <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   return(colnames(data))
 }
@@ -309,7 +280,9 @@ attribute_names <- function(data){
 
 ##############################################################################
 
-attribute_domains <- function(data){
+attribute_domains <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   domains <- vector(mode = 'character', length = length(attributes))
@@ -341,7 +314,9 @@ attribute_domains <- function(data){
 
 ##############################################################################
 
-textDomain_definitions <- function(data){
+textDomain_definitions <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   #no textDomains in any of the data
@@ -364,7 +339,9 @@ textDomain_definitions <- function(data){
 
 ##############################################################################
 
-attribute_measurement_scales <- function(data){
+attribute_measurement_scales <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   scales <- vector(mode = 'character', length = length(attributes))
@@ -398,7 +375,9 @@ attribute_measurement_scales <- function(data){
 
 ##############################################################################
 
-attribute_format_strings <- function(data){
+attribute_format_strings <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   formats <- vector(mode = 'character', length = length(attributes))
@@ -429,7 +408,9 @@ attribute_format_strings <- function(data){
 
 ##############################################################################
 
-attribute_number_type <- function(data){
+attribute_number_type <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   types <- vector(mode = 'character', length = length(attributes))
@@ -464,7 +445,9 @@ attribute_number_type <- function(data){
 
 ##############################################################################
 
-attribute_missing_value_codes <- function(data){
+attribute_missing_value_codes <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   codes <- rep(NA, times = length(attributes))
@@ -496,7 +479,9 @@ attribute_missing_value_codes <- function(data){
 
 ##############################################################################
 
-attribute_missing_value_explanations <- function(data){
+attribute_missing_value_explanations <- function(data_path){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   attributes <- colnames(data)
   explanations <- rep(NA, times = length(attributes))
@@ -531,23 +516,25 @@ attribute_missing_value_explanations <- function(data){
 
 ##############################################################################
 
-attribute_table <- function(data, definitions){
+attribute_table <- function(data_path, definitions){
+  
+  data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
   print('Manually examine measurement scales')
   print('Manually examine number types')
   print('Manually check for custom units')
   
   attributeTable <- data.frame(
-    attributeName = attribute_names(data),
-    domain = attribute_domains(data),
-    attributeDefinition = attribute_definitions(data, definitions),
-    definition = textDomain_definitions(data),
-    measurementScale = attribute_measurement_scales(data),
-    formatString = attribute_format_strings(data),
-    numberType = attribute_number_type(data),
-    unit = attribute_units(data, definitions),
-    missingValueCode = attribute_missing_value_codes(data),
-    missingValueCodeExplanation = attribute_missing_value_explanations(data),
+    attributeName = attribute_names(data_path),
+    domain = attribute_domains(data_path),
+    attributeDefinition = attribute_definitions(data_path, definitions),
+    definition = textDomain_definitions(data_path),
+    measurementScale = attribute_measurement_scales(data_path),
+    formatString = attribute_format_strings(data_path),
+    numberType = attribute_number_type(data_path),
+    unit = attribute_units(data_path, definitions),
+    missingValueCode = attribute_missing_value_codes(data_path),
+    missingValueCodeExplanation = attribute_missing_value_explanations(data_path),
     stringsAsFactors = FALSE)
   
   return(attributeTable)
@@ -558,5 +545,5 @@ attribute_table <- function(data, definitions){
 
 # Example:
 
-# attribute_table(data2,definitions)
-# set_attributes(attribute_table(data1,definitions))
+attribute_table(data_path_2,definitions)
+EML::set_attributes(attribute_table(data_path_2,definitions))
