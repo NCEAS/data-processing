@@ -26,8 +26,6 @@
 
 ##############################################################################
 
-library(stringr)
-
 
 definitions <- read.csv('/home/reevesman/Ameriflux/attribute_function/definitions.csv',
                         stringsAsFactors = FALSE)
@@ -172,6 +170,11 @@ attribute_units <- function(data_path, definitions){
   
   data <- read.csv(data_path, skip = 2, stringsAsFactors = FALSE)
   
+  #potential qualifiers
+  int_qualifiers <- c('_1','_2','_3','_4','_5','_6','_7','_8','_9')
+  char_qualifiers <- c('_PI','_QC','_IU','_SD','_F','_R','_A')
+  qualifiers <- c(int_qualifiers, char_qualifiers)
+  
   attributes <- colnames(data)
   
   #will be vector of attribute definitions
@@ -187,24 +190,14 @@ attribute_units <- function(data_path, definitions){
     #did not do all of the possible combinations of qualifiers
     #because not all possible combinations appeared in data
     
-    if (str_sub(att,-5,-1) == '_PI_F'){
-      str_sub(att,-5,-1) <- ""
-    }
-    
-    else if (str_sub(att,-3,-1) %in% c('_PI','_QC','_IU','_SD')){
-      str_sub(att,-3,-1) <- ""
-    }
-    
-    else if (str_sub(att,-2,-1) == '_F'){
-      str_sub(att,-2,-1) <- ""
-    }
-    
-    else if (str_sub(att,-2,-1) %in% c('_1','_2','_3','_4','_5','_6','_7','_8','_9')){
-      str_sub(att,-2,-1) <- ""
-    }
-    
-    else if (str_sub(att,-2,-1) %in% c('_R','_A')){
-      str_sub(att,-6,-1) <- ""
+    if (sum(sapply(qualifiers, grepl, x = att)) > 0){
+      
+      qualifier_indeces <- which(sapply(qualifiers, grepl, x = att) == TRUE)
+      att_qualifiers <- qualifiers[qualifier_indeces]
+      
+      for (j in 1:length(att_qualifiers)){
+        att <- gsub(att_qualifiers[j], replacement = '', x = att)
+      }
     }
     
     #if the attribute (with potential qualifiers removed) 
@@ -233,6 +226,7 @@ attribute_units <- function(data_path, definitions){
   }
   return(units)
 }
+
 
 ##############################################################################
 
