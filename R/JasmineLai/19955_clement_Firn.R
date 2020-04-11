@@ -26,9 +26,12 @@ pkg <- get_package(adc,
 
 doc <- read_eml(getObject(adc, pkg$metadata))
 
-for (i in seq_along(doc$dataset$otherEntity)) {
-  otherEntity <- doc$dataset$otherEntity[[i]]
-  id <- otherEntity$id
+f <- read_eml(getObject(adc, pkg$data))
+
+# updating the physical for all items in otherEntity
+for (i in seq_along(doc$dataset$otherEntity)) { # goes through all of the items in otherEntity
+  otherEntity <- doc$dataset$otherEntity[[i]] #grab the item in  that index
+  id <- otherEntity$id #get the  id
   
   if (!grepl("urn-uuid-", id)) {
     warning("otherEntity ", i, " is not a pid")
