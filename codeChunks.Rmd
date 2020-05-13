@@ -1,0 +1,156 @@
+---
+title: "Frequently Used Code Chunks"
+author: "Vivian Tran"
+date: "3/7/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+These are some code chunks that I frequently come back to when processing data for the Arctic Data Center. 
+
+#Reading in raw data
+##Single data file
+```{r eval=FALSE}
+df <- read.table("path/to/data", 
+               header=T, 
+               fill = T, # blank fields are added for rows that have unequal length,
+               sep= ",", # put "," for .csv file, "\t" for files with values separated by tabs
+               na.strings = c('','NA')) # fills blank rows with NA's 
+```
+Some things to note: I specify fill=T because I often get an error related to the lengths of rows/columns:
+
+```{r echo=FALSE}
+cat("Error in scan(file = file, what = what, sep = sep, quote = quote, dec = dec,  : 
+  line 1 did not have 10 elements")
+```
+
+This usually happens in .txt files.
+
+  
+##Multiple data files 
+I use these chunks when I want to read in several data files that share the same column names and formatting. I usually group my data files into different folders according to the type of data and/or formatting to facilitate reading in the data. This will help automate reformatting later on. 
+```{r eval=FALSE}
+# grab data paths from the folder that data is stored in 
+# "path" specifies name of folder that data paths are stored 
+# full.names = T produces full paths to fukes instead of just file name
+
+rawPaths <- dir(path = "path/to/folder", full.names = T) 
+```
+
+Read in data using a for loop. Remember to initialize all variables that you will be using outside of the for loop. 
+```{r eval=FALSE}
+dataList <- vector("list", length(rawPaths)) # makes an empty list with same length as file paths vector
+i=0 
+for(i in 1:length(rawPaths)){
+  dataList[[i]] <- read.table(rawPaths[i], 
+                               na.strings = c("", "NA"),
+                               header=T)  
+}
+```
+Note: list() creates an empty list of length 0. However, vector("list", length(rawPaths)) allocates a designated number of slots within the list instead of the list being constantly updated every time the for loop interates. With a small number of iterations, the time it takes for the code to run is not noticeable. However, for a large number of iterations, not allocating space will cause the code to run very slowly. 
+
+
+#Removing Extraneous Rows and Columns
+
+##Rows
+
+Iterate through all the rows in a data frame. 
+allRows is a vector containing "TRUE" and "FALSE". Each element corresponds to a row in dataFrame. 
+is.na(dataFrame[i,]) outputs "TRUE" if the row contains at least one blank cell, and "FALSE" otherwise. 
+all(is.na(dataFrame[i,])) outputs "TRUE" if all cells in that row are blank, and "FALSE" otherwise. 
+```{r eval=F}
+i=0
+allRows <- c() # initialize vector 
+for(i in 1:nrow(dataFrame)){
+  allRows[i] <- all(is.na(dataFrame[i,])) # store each output into allRows
+}
+
+blankRows <- which(allRows) # outputs indices of rows that contain "TRUE" (rows with all NA's) 
+dataFrame <- dataFrame[-blankRows,] # remove those blankRows from dataFrame
+```
+
+Alternatively, you can use apply() to iterate through all rows. You can use this for a single data frame or a list of multiple data frames using a for loop. 
+```{r eval=F}
+# outputs indices of rows with all NA's
+blankRows <- which(apply(dataFrame,1,function(x)all(is.na(x)))) 
+```
+
+##Columns
+```{r eval=F}
+
+i=0
+allCols <- c()
+for(i in 1:length(dataFrame)){ # length(dataFrame) gives us # of cols
+  allRows[i] <- all(is.na(dataFrame[,i])) # notice that we switch where the i goes 
+}
+
+blankCols <- which(allCols)
+dataFrame <- dataFrame[,-blankCols]
+```
+
+Alternatively:
+```{r eval=F}
+blankCols <- which(apply(dataFrame,2,function(x)all(is.na(x))))
+```
+
+
+#Searching Through Strings - Dates
+
+Use the grepl() function to search for a particular string. Since we often have to reformat dates in our data sets, searching for particular dates or times could be useful. 
+
+```{r}
+# an example of common date/time scenarios
+# this is usually a column within a data frame
+dates <- c("3/4/2016", "3/4/16", "3-4-2016", "3-4-16","3-4-16 12:30",
+           "3/4/2016", "3/4/16", "3-4-2016", "3-4-16","3-4-16 12:30",
+           "3/4/2016", "3/4/16", "3-4-2016", "3-4-16","3-4-16 12:30")
+```
+
+Run unique() to see what kind of formats there are. 
+```{r}
+unique(dates)
+```
+The international standard format for dates and time are YYYY-MM-DD and hh:mm:ss respectively, while the combined date-time standard is YYYY-MM-DDThh:mm:ss. Often times, researchers' data contain dates and times in varying formats because it may have been inputted by different people. 
+
+None of these are in the standard format, so we'll have to do some reformatting. 
+
+
+The following code gives us the indices that contain "/2016".
+```{r}
+indDates <- which(grepl("/2016",dates))
+indDates
+```
+
+Use as.POSIXct() to specify what our original date format is. 
+Use format() to specify the format that we want.
+Store values back into dates vector. 
+```{r}
+dates[indDates] <- format(as.POSIXct(dates[indDates], tz = "", format="%m/%d/%Y"), format = "%Y-%m-%d")
+dates[indDates]
+```
+This same process works for all of the formats in our dates vector.
+Note: 
+"-16" is ambiguous because it could also refer to the day within an already standard-formatted date (e.g. 2018-05-16). Always check to make sure. 
+We will reformat combined date/time items before the observations that don't contain times because they also contain "-16", which is ambiguous.
+
+```{r}
+indDates1 <- which(grepl("/16",dates))
+dates[indDates1] <- format(as.POSIXct(dates[indDates1], tz = "", format="%m/%d/%y"), format = "%Y-%m-%d")
+
+indDates2 <- which(grepl("-2016",dates))
+dates[indDates2] <- format(as.POSIXct(dates[indDates2], tz = "", format="%m-%d-%Y"), format = "%Y-%m-%d")
+
+indDates3 <- which(grepl("-16 ",dates))
+dates[indDates3] <- format(as.POSIXct(dates[indDates3], tz = "", format="%m-%d-%y %H:%M"), format = "%Y-%m-%dT%H:%M:%S")
+
+indDates4 <- which(grepl("-16",dates))
+dates[indDates4] <- format(as.POSIXct(dates[indDates4], tz = "", format="%m-%d-%y"), format = "%Y-%m-%d")
+```
+
+Our final dates vector now looks like this: 
+```{r echo=FALSE}
+dates
+```
