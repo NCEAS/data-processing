@@ -38,6 +38,9 @@ num <- which_in_eml(
   }
 )
 
+ent_names <- eml_get_simple(doc$dataset$otherEntity, "entityName")
+i <- which(ent_names == "Lidar.zip")
+
 # updating the description in the LIDAR other entity
 doc$dataset$otherEntity[[num]]$entityDescription <- "LIDAR derived digital elevation model (29 April 2018)"
 
