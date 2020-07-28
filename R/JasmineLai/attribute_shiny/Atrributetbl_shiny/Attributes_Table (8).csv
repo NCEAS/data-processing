@@ -1,6 +1,0 @@
-"attributeName","measurementScale","domain","unit","numberType","attributeLabel","attributeDefinition","definition","formatString","missingValueCode","missingValueCodeExplanation"
-"Year",NA,"numericDomain",NA,"natural",NA,NA,NA,NA,NA,NA
-"Month",NA,"numericDomain",NA,"natural",NA,NA,NA,NA,NA,NA
-"Day",NA,"numericDomain",NA,"natural",NA,NA,NA,NA,NA,NA
-"Hours (UTC)",NA,"numericDomain",NA,"whole",NA,NA,NA,NA,NA,NA
-"Water Level (m)",NA,"numericDomain",NA,"real",NA,NA,NA,NA,NA,NA
