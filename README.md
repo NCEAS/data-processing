@@ -5,7 +5,38 @@
 - **Authors**: Dominic Mullen
 - **License**: [Apache 2](http://opensource.org/licenses/Apache-2.0)
 - [Package source code on Github](https://github.com/NCEAS/data-processing)
-- Scripts are generally reviewed by order of submission  
+- Scripts are generally reviewed by order of submission
+
+## Code review
+This is a way for us to learn from each other and see how others process datasets.
+
+### Getting Reviewed
+1. Have some R script with your work
+2. Follow the steps to get a `fork` (copy) of this repository in the [First Contribution](#first-contribution) section
+3. In your `forked` repository add your R script you would like reviewed to the `R` folder
+4. Go to the `pull requests` tab in the main `NCEAS/data-procesing` repository
+5. Click the green `New pull request`
+6. Click `compare across forks`
+7. Pick your repository as the head repository
+8. Click `Create pull request`
+
+<p align="center">
+<img src="images/github_pr.png" width="700px" />
+</p>
+
+5. Ping the #datateam slack channel or select some reviewers on the right hand side
+
+### Reviewers
+Select a [pull request to review](https://github.com/NCEAS/data-processing/pulls)
+
+1. Go to the Files changed tab
+2. Go to any line you would like to start a conversation on
+3. Go to the line number an click on the blue `+` that will show up and leave your comments
+4. Once you are happy with your review go up to Review changes and select the comment option and click `submit review` to let the original requester know you are done.
+
+<p align="center">
+<img src="images/github_comment.png" width="1000px" />
+</p>
 
 ## Style
 We generally follow the [tidyverse style conventions](http://style.tidyverse.org/), with the following specific style preferences: 
@@ -86,10 +117,10 @@ your last contribution.  Before you can submit another pull request we need to P
         
 
 ## Acknowledgements
-Work on this package was supported by:
+Work on this repository was supported by:
 
 - The Arctic Data Center: NSF-PLR grant #1546024 to M. B. Jones, S. Baker-Yeboah, J. Dozier, M. Schildhauer, and A. Budden
 
 Additional support was provided by the National Center for Ecological Analysis and Synthesis, a Center funded by the University of California, Santa Barbara, and the State of California.
 
-[![nceas_footer](https://www.nceas.ucsb.edu/files/newLogo_0.png)](http://www.nceas.ucsb.edu)
+<img src="https://live-ncea-ucsb-edu-v01.pantheonsite.io/sites/default/files/2020-03/NCEAS-full%20logo-4C.png" width=50% height=50%>
