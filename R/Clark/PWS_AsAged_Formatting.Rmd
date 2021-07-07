@@ -1,0 +1,540 @@
+---
+title: "PWS As Aged File Processing"
+author: "Jeanette Clark"
+date: "10/19/2017"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+This markdown processes salmon Age, Sex, Length (ASL) data from the Prince William Sound and Copper River areas. These files are fixed width with a varying fixed-width structure within the file. Longer, 52 character width lines contain sample event information including the sample date, location, gear, project type. Shorter, 26 character width lines contain sample information, including the sex, length, and age. 
+
+This file structure arises from the way these data are collected. To gather age/sex/length samples, scales are taken from fish out of a representative sample caught at an ASL sampling project. These projects can be from escapement enumeration projects, commercial fishing operations, or hatchery operations. Scales from fish taken during a sampling event are placed on "scale cards," along with other information about both the sampling event (such as the date and location) and the fish itself (such as length and sex). For Prince William Sound/Copper River salmon, all chinook and coho have a maximum of 10 fish sampled per scale card, whereas sockeye and chum salmon have a maximum of 40 fish sampled per card (pink salmon too, but they are rarely sampled). This is because Chinook and coho lose scales easily and therefore a larger portion of the sampled scales are “regenerated” and are not useable. To get around this, up to 4 scales need to be pulled from each Chinook or coho in the hope of finding a single scale that can be successfully aged. The PWS scale cards have 4 rows and 10 columns: for sockeye and chum, each of the 40 positions get a scale from a single fish; for Chinook and coho, each column gets 3-4 scales from a single fish.
+
+The sample event information lines (52 character) in these files, therefore, are information that are recorded at the top of each sample card about the sampling event, and the sample lines (26 character) are information derived from the scale samples and associated information. Together, these represent the information from an entire card. In this dataset, each file contains information from anywhere between 2 and 30+ cards.
+
+Below is a view of data from 3 cards within the same file:
+
+![](images/PWS_structure.jpg)
+
+The positions of information within the fixed-width format is explained in more detail here:
+
+![](images/AscIIHeaderinfo.jpg)
+
+In addition to the information within the file, in the form of the sample event information and the sample information, some duplicate information is contained within the filenames themselves. This information is derived from what is in the file. However, it does not always agree exactly with the information contained within the file, causing problems that will be dealt with later in this analysis. Despite the occasional contradiction, the filename information is occasionally helpful, especially given that some aspects of the sample event information have unknown provenance. Although the provenance chain is lost on these pieces of information, the filename information can sometimes be used to intuit their meaning.
+
+Below is a description of the file format and codes contained within the filenames.
+
+![](images/filanameinfo.jpg)
+
+
+# Data Extraction
+
+First, all of the data from the files is extracted into a large list of character lines.
+
+```{r read, message = FALSE, warning = FALSE, results = 'hide'}
+library(stringi)
+library(dplyr)
+library(lubridate)
+library(kableExtra)
+library(knitr)
+library(data.table)
+path <- '/home/sjclark/ASL/Originals/PWS_CopperRiver/As Aged/'
+files <- dir(path, recursive = T)
+#remove header info file
+i <- grep("*HEADER",files)
+files <- files[-i]
+
+lines <- lapply(file.path(path,files),scan, what = 'character', sep = '\n', quiet = T)
+```
+
+
+
+
+
+## Sample Event Extraction
+
+Now the sample event lines and the sample lines need to be separated, since they have to be parsed differently. First the filenames are pasted onto the ends of the text lines that correspond to them in order to track which row came from which file. The data are then unlisted.
+
+```{r , message = FALSE, warning = FALSE}
+
+lines2 <- c()
+for (i in 1:length(files)){
+    lines2[[i]] <- paste(lines[[i]], files[i], sep = ',')
+}
+#unlist all the data
+lines2 <- unlist(lines2)
+```
+
+
+### QA Step: Removing supurious header text
+
+Before going further, since every valid data line should start with a number, lines that start with characters are searched for and removed.
+
+```{r,  message = FALSE, warning = FALSE}
+i <- grep('^[A-Z]', lines2, ignore.case = T)
+lines2 <- lines2[-i]
+```
+
+Now a quick check to make sure that every line has a data file attached to it, and removing the filenames into their own vector (which is the same length as the total number of lines).
+
+```{r, message = FALSE, warning = FALSE}
+test <- as.data.frame(stri_split_fixed(lines2, ',', simplify = T))
+filenames <- test$V2
+lines <- as.character(test$V1)
+rm(test, lines2)
+```
+
+The sample event information lines need to be extracted from the sample lines. Luckily, all of the sample event lines start with '00', so they can be found by searching for '00' at the beginning of the line. They are then extracted into a dataframe with columns based on the parsing information shown in the introduction. Filenames are also added into the dataframe to be able to track which file the data came from.
+
+```{r,  message = FALSE, warning = FALSE}
+#rm(test)
+#find lines starting with "00" (indicating sample event information)
+ is <-grep("^00", lines, fixed = F)
+ 
+ 
+ #extract sample event information
+ infolines <- lines[is]
+ info <- c()
+ info$LocationCode <- substr(infolines, 13,26)
+ info$SpeciesID <- substr(infolines, 11,11)
+ info$District <- as.numeric(substr(infolines, 13,15))
+ info$Sub.District <- as.numeric(substr(infolines, 17,18))
+ info$sampleDate <- substr(infolines,31,38)
+ info$period <- as.numeric(substr(infolines, 40,41))
+ info$gearID <- as.numeric(substr(infolines, 42,43))
+ info$Mesh.Size <- as.numeric(substr(infolines, 44,45))
+ info$lengthtypeID <- as.numeric(substr(infolines, 46, 46))
+ info$cardNo <- as.numeric(substr(infolines, 50,52))
+ 
+ info <- data.frame(info, stringsAsFactors = F)
+ info$filename <- filenames[is]
+```
+
+### QA Step: Checking species and dates
+
+Species and date information is checked to ensure parsing was done correctly. The species code should be 1, 2, 3, 4, or 5.
+
+```{r}
+i <- which(info$SpeciesID != '1' & info$SpeciesID != '2'&info$SpeciesID != '3'&info$SpeciesID != '4'&info$SpeciesID != '5')
+print(paste(infolines[i], info$filename[i], sep = ';'))
+```
+
+These sample event information lines appear to either have no species info at all, or it is in the wrong place in the line. These problem files are saved in a dataframe to be examined in more detail later.
+
+```{r, message = FALSE, warning = FALSE}
+problems <- data.frame(file = unique(info$filename[i]), problem = 'event info - species')
+```
+
+The dates need to be reformatted and checked as well.
+
+```{r}
+info$sampleDate <- as.Date(info$sampleDate, format = '%m/%d/%y')
+i <- which(year(info$sampleDate) > 2016)
+info$sampleDate[i] <- info$sampleDate[i] - 100*365.25
+i <- which(is.na(info$sampleDate) == T)
+print(paste(infolines[i], info$filename[i], sep = ';'))
+
+```
+
+
+There are clearly some mistakes and missing information in these lines. This is added to the dataframe with a description of the problem.
+
+```{r, message = FALSE, warning = FALSE}
+problems2 <- data.frame(file = unique(info$filename[i]), problem = 'event info - dates')
+problems <- rbind(problems, problems2)
+rm(problems2)
+```
+
+To figure out what is going on exactly with these files, the original text files must be opened and examined. Here is more detailed information on these problems after examining each file individually, with a description of the solution.
+
+```{r, message = FALSE, warning = FALSE}
+problems <- read.csv('/home/sjclark/ASL/PWS_processing_corrections/PWS_problems_SpeciesDates_cards.csv', stringsAsFactors = F)
+kable(problems, row.names = F, format = 'html') %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) #%>%
+
+```
+
+To fix these problems, the original info lines with problems must be found and several bad date and species/location strings replaced. To make this easier, `gsub` is used on all of the bad portions of the file info lines, and the sample event information lines are reprocessed from scratch exactly like what was done above.
+
+```{r}
+infolines <- gsub('19/19/85', '09/19/85', infolines)
+infolines <- gsub('07/09/  ', '07/09/90', infolines)
+infolines <- gsub('  /  /90', '01/01/90', infolines)
+infolines <- gsub('16/25/91', '06/25/91', infolines)
+infolines <- gsub('  /  /93', '01/01/93', infolines)
+infolines <- gsub('0000000045 221-00-000-800  1 07/18/91 0501  2   001', '0000000045 221-00-000-800  1 07/18/91 0501  2   001', infolines)
+infolines <- gsub('225-21-000-000-000', '225-21-000-000', infolines)
+infolines <- gsub('00000000450323-00-000-000', '00000000045 223-00-000-000', infolines)
+
+
+
+```
+
+
+```{r, warning = FALSE, message = FALSE}
+
+ info$LocationCode <- substr(infolines, 13,26)
+ info$SpeciesID <- substr(infolines, 11,11)
+ info$District <- as.numeric(substr(infolines, 13,15))
+ info$Sub.District <- as.numeric(substr(infolines, 17,18))
+ info$projectcodeID <- substr(infolines, 28,29)
+ info$sampleDate <- substr(infolines,31,38)
+ info$period <- as.numeric(substr(infolines, 40,41))
+ info$gearID <- as.numeric(substr(infolines, 42,43))
+ info$Mesh.Size <- as.numeric(substr(infolines, 44,45))
+ info$lengthtypeID <- as.numeric(substr(infolines, 46, 46))
+ info$cardNo <- as.numeric(substr(infolines, 50,52))
+ info <- data.frame(info, stringsAsFactors = F)
+ info$filename <- filenames[is]
+ 
+```
+
+Next, the solution to replace missing/nonsensical species information with species information from the filename is applied. This is done for all of the files that have that problem. Note that it is acceptable to replace ALL of the data from each file's sample event information, whether there was a problem or not, with the species info from the filename, since it was determined that all of the sample event lines agree with the filename in these files.
+
+```{r}
+i <- which(problems$solution_description == 'use species from file name since other sample info lines agree with filename')
+files_speciesreplace <- problems$file[i]
+i2 <- c()
+for (z in 1:length(files_speciesreplace)){
+ i2[[z]] <- which(info$filename == files_speciesreplace[z])   
+}
+i2 <- unlist(i2)
+info$filename <- as.character(info$filename)
+info$SpeciesID[i2] <- as.numeric(substr(info$filename[i2], 6,6))
+```
+
+## Individual Sample Extraction
+
+Now the individual sample (scale information) is extracted from the short lines in a similar way to how the sample event information was extracted. This is all according to the parsing document shown in the introduction.
+
+```{r, message = FALSE, warning = FALSE}
+#extract sample information
+data_t <- lines[-is]
+data <- c()
+data$fishNum <- as.numeric(substr(data_t, 1,2))
+data$sexID <- as.numeric(substr(data_t, 4,4))
+data$Length <- as.numeric(substr(data_t, 6,9))
+data$Fresh.Water.Age <- as.numeric(substr(data_t, 11,11))
+data$Salt.Water.Age <- as.numeric(substr(data_t, 12,12))
+data$ageerrorID <- as.numeric(substr(data_t, 15,15))
+data <- as.data.frame(data)
+```
+
+Of course, the individual sample information data frame is much longer than the sample event information data frame, but it is necessary to populate all of the sample event information alongside each individual sample. This is done by repeating the sample event information according to how many individual samples there are per sample event. The saved index vector `is` is used here - note that this comes from the search for rows from the original data starting with '00', which are the sample event lines.
+
+Once the expanded sample event information is created, it is bound to the individual sample information, creating a single dataframe.
+
+```{r, message = FALSE, warning = FALSE}
+
+is2 <- c(is, length(lines)+1) #indices of info rows + last row
+r <- diff(is2) #find number of rows each info row represents
+
+info <- info[rep(seq_len(nrow(info)), times = r-1), ] #repeat info according to rep scheme defined by the number of rows each info row represents
+info <- data.frame(info, stringsAsFactors = F) #create expanded info data frame
+
+data <- cbind(data,info) #bind the two
+```
+
+### Code Translation
+
+To make this dataset more human readble, the numerous codes outlined in the parsing documents shown in the introduction need to be converted into their more descriptive words. This is done by creating a number of lookup dataframes for each coded field and using a left join to join these lookup tables to the main data frame.
+
+```{r, message = FALSE, warning = FALSE}
+sex_code <- data.frame(sexID = c(1,2,3,0,5), Sex = c('male', 'female', 'unknown','unknown', 'unknown'))
+gear_code <- data.frame(gearID = c(19, 0:14, 16:18, 31, 43),
+                        Gear = c('weir', 'trap', 'seine', 'seine', 'gillnet', 'gillnet', 'troll', 'longline', 'trawl', 'fishwheel', 'pots', 'sport hook and line', 'seine',
+                                 'handpicked or carcass', 'dip net', 'weir', 'electrofishing', 'trawl', 'handpicked or carcass', 'gillnet and seine', 'gillnet'))
+length_code <- data.frame(lengthtypeID = c(1:7), Length.Measurement.Type = c('tip of snout to fork of tail', 'mid-eye to fork of tail', 'post-orbit to fork of tail', 'mid-eye to hypural plate',
+                                                  'post orbit to hypural plate', 'mid-eye to posterior insertion of anal fin', 'mid-eye to fork of tail'))
+age_error_code <- data.frame(ageerrorID = c(1:9), Age.Error = c('otolith', 'inverted', 'regenerated', 'illegible', 'missing', 'resorbed', 'wrong species', 'not preferred scale', 'vertebrae'))
+
+species_code <- data.frame(SpeciesID = c('1','2','3','4','5'), Species = c('chinook', 'sockeye', 'coho', 'pink', 'chum'))
+#project names are modified slightly from original definitions to reflect overall SASAP project code vocabulary
+project_code <- data.frame(projectcodeID = c('1','2','3','4','5','6','7','8','9','10'), ASLProjectType = c('commercial catch', 'subsistence catch', 'escapement', 'escapement', 'test fishing', 'sport catch', 'sport catch', 'brood stock recovery', 'personal use', 'hatchery cost recovery'))
+
+data <- left_join(data, sex_code)
+data <- left_join(data, gear_code)
+data <- left_join(data, length_code)
+data <- left_join(data, age_error_code)
+data <- left_join(data, species_code)
+data <- left_join(data, project_code)
+```
+
+
+## Filename Info Extraction
+
+The last bit of data that needs to be extracted are the data that come from the filenames themselves. These are parsed according to the parsing document shown in the introduction.
+
+```{r, message = FALSE, warning = FALSE}
+filenames_original <- filenames
+filenames <- filenames[-is]; filenames <- as.character(filenames)
+
+fileinfo <-  c()
+fileinfo$Area_filename <- substr(filenames, 7,7); fileinfo$Area_filename <- tolower(fileinfo$Area_filename)
+fileinfo$Gear_filename <- substr(filenames, 11,11);fileinfo$Gear_filename <- tolower(fileinfo$Gear_filename)
+fileinfo$Species_filename <- substr(filenames, 6,6)
+fileinfo$Location_filename <- paste(substr(filenames, 10,10),substr(filenames, 12,13), sep = '')
+fileinfo$ASLProjectType_filename <- tolower(substr(filenames, 10,10))
+```
+
+Again, lookup tables are created to translate codes to more human-readable text.
+
+```{r, message = FALSE, warning = FALSE}
+gear_codef <- data.frame(Gear_filename = c('p', 'd', 's', 'g', 'n', 'f', 'b', 'w', 'c', 'x', 'r'),
+                        GearF = c('purse seine', 'drift gillnet','set gillnet', 'gillnet','dipnet', 'fish wheel', 'beach seine', 'weir', 'carcass', 'handpicked, mixed, unknown', 'rod and reel'))
+species_codef <- data.frame(Species_filename = c('1','2','3','4','5'), SpeciesF = c('chinook', 'sockeye', 'coho', 'pink', 'chum'))
+area_codef <- data.frame(Area_filename = c('c','b','y','p'), AreaF = c('Copper River', 'Bering River', 'Yakutat', 'Prince William Sound'))
+project_codef <- data.frame(ASLProjectType_filename = c('c','s','p','h','t','r','e','b','x','d'), ASLProjectTypeF = c('commercial catch','subsistence catch','personal use','hatchery cost recovery','test fish','sport fish','escapement','brood stock','brood excess', 'unknown'))
+location_codef <- read.csv('/home/sjclark/ASL/PWS_processing_corrections/PWS_filenameLocationCodes_original.csv', stringsAsFactors = F)
+location_codef$Location_filename <- tolower(location_codef$Location_filename)
+```
+
+These lookup tables are joined to the file information data table, and the old code columns are removed.
+
+```{r, message = FALSE, warning = FALSE}
+fileinfo <- data.frame(fileinfo, stringsAsFactors = F)
+
+data <- cbind(data,fileinfo)
+
+data <- left_join(data, gear_codef)
+data <- left_join(data, species_codef)
+data <- left_join(data, area_codef)
+data <- left_join(data, project_codef)
+data$Location_filename <- tolower(data$Location_filename); data <- left_join(data, location_codef)
+
+data$Area_filename <- NULL; data$Gear_filename <- NULL; data$Species_filename <- NULL; data$ASLProjectType_filename <- NULL; data$Location_filename <- NULL
+#convert factors to characters
+i <- sapply(data, is.factor)
+data[i] <- lapply(data[i], as.character)
+
+```
+### QA Step: Checking filename information joins
+
+Here, we check to see what information may have been missing from our lookup tables. Information didn't join to a code above should be examined, so first NA values in the Area, Gear, Species, and ASLProjectType columns are found, and the original filenames written to a dataframe.
+
+```{r}
+i <- which(is.na(data$AreaF) == T |  is.na(data$GearF) == T |  is.na(data$SpeciesF) == T | is.na(data$ASLProjectTypeF) == T)
+
+problems <- data.frame(file = unique(data$filename[i]), problem = 'filename')
+```
+
+After looking at the files individually, another solutions data frame is created, and shown below.
+
+```{r}
+problems <- read.csv('/home/sjclark/ASL/PWS_processing_corrections/FileNameProblems.csv', stringsAsFactors = F)
+problems <- data.table(problems)
+#summarize these for display since so many are the same
+problems_sum <- problems[, .(files = paste(unique(file), collapse = ';')), by = .(problem, problem_detailed, solution_description, solution_code)]
+kable(problems_sum, row.names = F, format = 'html') %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) #%>%
+
+```
+First the issue with missing gear information is fixed. The lines in the main data frame that correspond to these files are found, then the information in the GearF (gear derived from filename) column is replaced with information from the Gear (gear derived from file) column.
+
+```{r}
+i <- which(problems$solution_code == 1)
+files_gearreplace <- problems$file[i]
+i2 <- c()
+for (z in 1:length(files_gearreplace)){
+ i2[[z]] <- which(data$filename == files_gearreplace[z])   
+}
+i2 <- unlist(i2)
+data$filename <- as.character(data$filename)
+data$GearF[i2] <- data$Gear[i2]
+```
+
+For problem 2, the file with no Area information, based on the district information within the file, the Area is clearly "Bering River."
+
+```{r}
+i <- which(problems$solution_code == 2)
+files_replace <- problems$file[i]
+i2 <- which(data$filename == files_replace)   
+
+data$AreaF[i2] <- 'Bering River'
+
+```
+
+Finally, problem 3, the files with unknown filename conventions. For these, the gear, species, and project information must be taken from the file itself. The values in these filename columns are replaced with those from the file derived data.
+
+```{r}
+i <- which(problems$solution_code == 3)
+files_replace <- problems$file[i]
+i2 <- c()
+for (z in 1:length(files_replace)){
+ i2[[z]] <- which(data$filename == files_replace[z])   
+}
+i2 <- unlist(i2)
+
+data$GearF[i2] <- data$Gear[i2]
+data$SpeciesF[i2] <- data$Species[i2]
+data$ASLProjectTypeF[i2] <- data$ASLProjectType[i2]
+```
+
+Unfortunately, Area only comes from the filename, so the above solution cannot be used for those files, but the district information can be used to determine the area. Here, rows with no Area information are found, and the unique districts are shown.
+
+```{r}
+i2 <- which(is.na(data$AreaF) == T)
+print(unique(data$District[i2]))
+
+```
+
+District 212 is Copper River, while 225 and 223 are Prince William Sound. The areas are assigned accordingly.
+
+```{r}
+data$AreaF[which(is.na(data$AreaF) == T & data$District == 212)] <- "Copper River"
+data$AreaF[which(is.na(data$AreaF) == T & data$District == 225)] <- "Prince William Sound"
+data$AreaF[which(is.na(data$AreaF) == T & data$District == 223)] <- "Prince William Sound"
+```
+
+### QA Step: Do two species sources agree?
+
+As another quality assurance step, the two sources of species information are compared. Unfortunately they don't always agree. These rows where they disagree are examined and issues resolved. First a problems data frame is written.
+
+```{r}
+i <- which(data$Species != data$SpeciesF)
+problems <- data.frame(file = unique(data$filename[i]), problem = 'species disagreement')
+```
+
+The original text files with species disagreement were examined individually. Some of the more confusing files were examined by Rich Brenner, an expert in the field, to determine which species designation is correct. What follows is a description of these errors and their solution.
+
+```{r}
+problems <- read.csv('/home/sjclark/ASL/PWS_processing_corrections/species_disagreement.csv', stringsAsFactors = F)
+problems <- data.table(problems)
+kable(problems, row.names = F, format = 'html') %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) #%>%
+
+```
+
+Although the explanations and rationale behind the problems are complex, the solutions for all of them are simple - default to the species given by the filename in all of the files. 
+
+```{r}
+i <- c()
+for (z in 1:length(files_gearreplace)){
+ i[[z]] <- which(data$filename == problems$file[z])   
+}
+i <- unlist(i)
+data$Species[i] <- data$SpeciesF[i]
+```
+
+Finally, many of these columns can be cleaned up, including the ones with IDs that were transformed into more clear words, and all of the columns for species, gear, and project type that come from the sample event information in the file itself as opposed to the filename. Overall, the information in the sample event information is much more subject to error than the filename, since all of these data were hand entered. Therefore, the Gear, Species, and ASLProjectType columns are removed, defaulting to the filename derived GearF, SpeciesF, and ASLProjectTypeF columns. These columns are renamed to remove the F designator.
+
+```{r}
+#removing ID columns
+data$sexID <- NULL; data$gearID <- NULL; data$lengthtypeID <- NULL; data$projectcodeID <- NULL; data$ageerrorID <- NULL; data$SpeciesID <- NULL
+#removing duplicate columns derived from sample event info
+data$Gear <- NULL; data$Species <- NULL; data$ASLProjectType <- NULL
+
+```
+
+
+```{r}
+colnames(data)[16] <- 'Gear'
+colnames(data)[17] <- 'Species'
+colnames(data)[18] <- 'Area'
+colnames(data)[19] <- 'ASLProjectType'
+```
+
+## Location Information
+
+Location information is stored in two places in the files, the filename and the sample event information within the file. Although the location information within the file is more subject to typeographical error, it does have a higher spatial resolution than the filename information, which in many cases indicates only "mixed." Therefore, unlike the Gear, Species, and ASLProjectType columns, these data are preferred over filename information and must be dealt with.
+
+The location codes within the file are specific to the local department, and follow the general format: DDD-SS-RRR-NNN, where DDD is the commercial fishing district, SS the sub-district, RRR the local department stream/system identifier, and NNN an additional sub-system identifier. The district and sub-district information is easy to parse and assign a location name, as it is used consistently throughout the state and is well documented. For information and clarification on these fields we reference these two maps for the [Copper/Bering Rivers](http://www.adfg.alaska.gov/static/fishing/PDFs/commercial/pwsstatmaps/212-200_Copper_Bering_Districts_ReportingAreas_2012.pdf) and [Prince William Sound.](http://www.adfg.alaska.gov/static/fishing/PDFs/commercial/pwsstatmaps/2017_pws_statistical_area_map.pdf) The stream identifier is more challenging, as this is the portion of the identifier that is specific to local offices. 
+
+The stream identifiers for Prince William Sound are based on Stream # columns from this file (aspws.xls):
+
+![](images/PWS_streamcodes.jpg)
+
+In the location identifier used in the sample event information lines, the streamcodes are padded with 0s, so Sheep River, for example, is designated as 221-20-036-000.
+
+The stream identifiers for the Copper/Bering River area are based on the CF Index number from this file (CBRStrmCodes.xls). Frequently the numbers in the dataset match not the number exactly, but instead the first two or three digits of the number, padded with a 0 if necessary. Here is a look at the header for this file:
+
+![](images/CR_streamcodes.jpg)
+
+Power Creek, then, would have a location code of 212-10-026-000 in these data. 
+
+Unfortunately, many of these locations share the same CF Index code, for example the various locations within Eyak Lake. The data itself seems to suggest that there is a way to distinguish between the sub-locations with Eyak Lake, with unique location values of 212-10-022-211, 212-10-022-212, 212-10-022-215. Although, to my knowledge, there is no documentation giving the codes to the last 3 digits of the location ID, we can reincorporate the filename information alongside the location code to see if it helps decode them at all.
+
+To decode the location information and assign a location name, we find unique combinations of the LocationCode and LocationF columns, location information derived from the sample event information and the filename, respectively, along with the number of samples for each of these combinations.
+
+
+```{r, eval = F}
+data <- data.table(data)
+data_loc_summary <- data[, .(n = length(Length)), by = .(LocationCode, LocationF)]
+kable(data_loc_summary[1:10,], row.names = F, format = 'html') %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
+
+From this information, along with the information from the two files described above, we will attempt to assign each unique location code as precise and accurate of a location name as possible. After assigning each unique location code a location name, this will be used as a lookup table to join the location names to the entire dataset. Improved district and subdistrict information will also be included in the lookup table since there are several typeos in these fields.
+
+In cases where the last three digits of a location code can be intuited from the location information in the filename, the location information from the filename will be used to inform the location name If there are multiple filename derived locations for a location code, but one is used for a very large portion of the data relative to the others, the location name is derived from the most ubiquitously used filename location. In rare cases, there is no apparent stream identifier match from the department files but there is information from the filename that is more prescise than district level information. In these cases, the information from the filename is used. In general, however, there has be a compelling reason to use the filename information over the information in the file.
+
+The finest resolution location name will be determined by using the entire location code if possible, and moving backwards through the levels as they are able to be identified. For example, for code 225-21-503-000, since 503 is not listed in the Prince William Sound streamcode file, the finest resolution can confidently assign this location is the subdistrict level, or "Main Bay" in this case. 
+
+Here are the results from this location decoding.
+
+```{r}
+locs <- read.csv('/home/sjclark/ASL/PWS_processing_corrections/PWS_location_lookup.csv', stringsAsFactors = F)
+kable(locs, row.names = F, format = 'html') %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) #%>%
+```
+
+Now joining this to the main data frame - removing the filename location column and the number of samples column, and duplicate rows, first.
+
+```{r, warning = FALSE, message = FALSE}
+locs$LocationF <- NULL; locs$n <- NULL
+i <- which(duplicated(locs) == TRUE)
+locs <- locs[-i, ]
+data <- left_join(data, locs)
+```
+
+Now we just need to clean up columns - dropping the old location code, district, and subdistrict columns, and renaming the new ones so they are consistent with the rest of the SASAP datasets.
+
+```{r}
+data$LocationCode <- NULL; data$LocationF <- NULL; data$District <- NULL; data$Sub.District <- NULL; 
+data$filename <- NULL; data$period <- NULL
+```
+
+Create a SASAP region column consistent with the rest of the SASAP data and drop the Area column.
+
+```{r}
+data$SASAP.Region <- NA
+data$SASAP.Region[which(data$Area == 'Yakutat')] <- 'Southeast'
+data$SASAP.Region[which(data$Area == 'Bering River')] <- 'Copper River'
+data$SASAP.Region[which(data$Area == 'Prince William Sound')] <- 'Prince William Sound'
+data$SASAP.Region[which(data$Area == 'Copper River')] <- 'Copper River'
+data$Area <- NULL
+```
+
+Fix the dates
+
+```{r}
+data$sampleDate <- as.Date(data$sampleDate, format = '%m/%d/%y')
+i <- which(year(data$sampleDate) > 2016)
+data$sampleDate[i] <- data$sampleDate[i] - 100*365.25
+```
+
+Fix subdistrict information so '0' is '00'
+
+```{r}
+data$SubDistrictID <- as.character(data$SubDistrictID)
+data$SubDistrictID[which(data$SubDistrictID == '0')] <- '00'
+```
+
+Rename a couple of columns
+
+```{r}
+colnames(data)[15] <- 'District'
+colnames(data)[16] <- 'Sub.District'
+data$Source <- 'PWS LengthFreq Textfiles'
+```
+
+Finally, write the file!
+
+```{r}
+write.csv(data, '/home/sjclark/ASL/ASL_data_formatted/PWS_CopperRiver.csv', row.names = F)
+```
